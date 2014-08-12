@@ -3,8 +3,6 @@ package elebeta.ds;
 import elebeta.ds.DAryHeap;
 import utest.Assert;
 
-using TestDAryHeap.DAryHeapHelpers;
-
 @:publicFields
 class TestDAryHeap {
 
@@ -19,7 +17,7 @@ class TestDAryHeap {
     }
 
     function testMinIntHeap() {
-        var heap = new DAryHeap({checkProperty : minIntHeap});
+        var heap = new DebugDHeap({checkProperty : minIntHeap});
         heap.insert(3);
         Assert.same([3], heap.dump());
         heap.insert(2);
@@ -42,26 +40,25 @@ class TestDAryHeap {
         Assert.same([4, 9, 10], heap.dump());
     }
 
-    private
-    function dumpHeap<A>(heap : DAryHeap<A>) {
-        var length = heap.length;
-        var internal = heap.fullDump();
-        return 'Heap { len: $length, internal: ${internal.length}/${internal.toString()} }';
-    }
-
 }
 
-@:publicFields
-class DAryHeapHelpers {
+@:forward @:access(elebeta.ds.DAryHeap)
+abstract DebugDHeap<A>(DAryHeap<A>) {
 
-    static function dump<A>(heap : DAryHeap<A>) {
-        return heap.fullDump().slice(0, heap.length);
+    public
+    function new(conf) {
+        this = new DAryHeap<A>(conf);
     }
 
-    static function fullDump<A>(heap : DAryHeap<A>) {
-        var internal : haxe.ds.Vector<A> = untyped heap.internal;
-        return internal.toArray();
+    public
+    function dump() {
+        return fullDump().slice(0, this.length);
     }
-    
+
+    public
+    function fullDump() {
+        return this.internal.toArray();
+    }
+
 }
 

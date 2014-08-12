@@ -20,7 +20,7 @@ import haxe.ds.Vector;
     (wiki/check)
 
 **/
-//@:generic
+@:generic
 class DAryHeap<A> {
 
     /**
