@@ -21,7 +21,7 @@ import haxe.ds.Vector;
 
 **/
 @:generic
-class DAryHeap<A> {
+class DHeap<A> {
 
     /**
         Number of elements.

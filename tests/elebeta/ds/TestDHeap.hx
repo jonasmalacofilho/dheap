@@ -1,10 +1,10 @@
 package elebeta.ds;
 
-import elebeta.ds.DAryHeap;
+import elebeta.ds.DHeap;
 import utest.Assert;
 
 @:publicFields
-class TestDAryHeap {
+class TestDHeap {
 
     function new() {}
 
@@ -42,12 +42,12 @@ class TestDAryHeap {
 
 }
 
-@:forward @:access(elebeta.ds.DAryHeap)
-abstract DebugDHeap<A>(DAryHeap<A>) {
+@:forward @:access(elebeta.ds.DHeap)
+abstract DebugDHeap<A>(DHeap<A>) {
 
     public
     function new(conf) {
-        this = new DAryHeap<A>(conf);
+        this = new DHeap<A>(conf);
     }
 
     public
