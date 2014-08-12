@@ -30,12 +30,23 @@ class DAryHeap<A> {
     var length(default, null) : Int;
 
     public
-    function new(conf : { checkProperty : A -> A -> Bool }, ?arity=2) {
+    function new(conf : DHeapConf<A>, ?arity=2) {
         // maybe: move arity to @:genericBuild
         this.arity = arity;
         length = 0;
-        // to do: configure
+        if (conf.checkProperty == null)
+            throw "Invalid configuration: missing `checkProperty`";
+        if (conf.savePosition == null && (conf.getPosition != null || conf.contains != null))
+            throw "Shouldn't override `getPostion` or `contains` with stock (NOOP) `savePostion`";
         checkProperty = conf.checkProperty;
+        if (conf.savePosition != null)
+            savePosition = conf.savePosition;
+        if (conf.getPosition != null)
+            getPosition = conf.getPosition;
+        if (conf.clearPosition != null)
+            clearPosition = conf.clearPosition;
+        if (conf.contains != null)
+            contains = conf.contains;
     }
 
     /**
@@ -167,8 +178,13 @@ class DAryHeap<A> {
 
     dynamic
     function contains(item : A) : Bool {
-        // defaults to linear search
-        return false;  // to do
+        var pos = 0;
+        while (pos < internal.length) {
+            if (get(pos) == item)
+                return true;
+            pos++;
+        }
+        return false;
     }
 
     // Wrapper around internal data structure
@@ -248,5 +264,13 @@ class DAryHeap<A> {
         return pos;
     }
 
+}
+
+typedef DHeapConf<A> = {
+    checkProperty : A -> A -> Bool,
+    ?savePosition : A -> Int -> Int,
+    ?getPosition : A -> Int,
+    ?clearPosition : A -> Void,
+    ?contains : A -> Bool
 }
 
