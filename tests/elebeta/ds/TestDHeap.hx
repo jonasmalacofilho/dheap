@@ -17,7 +17,14 @@ class TestDHeap {
     }
 
     function testMinIntHeap() {
-        var heap = new DebugDHeap({checkProperty : minIntHeap});
+        var heap = DHeapMacro.createClass( (_ : Int), (_ : {
+            override function checkProperty(parent:Int, child:Int) 
+            {
+                return parent <= child;
+            }
+        }));
+        var heap = new DebugDHeap(heap);
+        //var heap = new DebugDHeap({checkProperty : minIntHeap});
         heap.insert(3);
         Assert.same([3], heap.dump());
         heap.insert(2);
@@ -47,7 +54,7 @@ abstract DebugDHeap<A>(DHeap<A>) {
 
     public
     function new(conf) {
-        this = new DHeap<A>(conf);
+        this = conf;
     }
 
     public

@@ -20,7 +20,7 @@ import haxe.ds.Vector;
     (wiki/check)
 
 **/
-@:generic
+//@:generic
 class DHeap<A> {
 
     /**
@@ -30,23 +30,10 @@ class DHeap<A> {
     var length(default, null) : Int;
 
     public
-    function new(conf : DHeapConf<A>, ?arity=2) {
+    function new(?arity=2) {
         // maybe: move arity to @:genericBuild
         this.arity = arity;
         length = 0;
-        if (conf.checkProperty == null)
-            throw "Invalid configuration: missing `checkProperty`";
-        if (conf.savePosition == null && (conf.getPosition != null || conf.contains != null))
-            throw "Shouldn't override `getPostion` or `contains` with stock (NOOP) `savePostion`";
-        checkProperty = conf.checkProperty;
-        if (conf.savePosition != null)
-            savePosition = conf.savePosition;
-        if (conf.getPosition != null)
-            getPosition = conf.getPosition;
-        if (conf.clearPosition != null)
-            clearPosition = conf.clearPosition;
-        if (conf.contains != null)
-            contains = conf.contains;
     }
 
     /**
@@ -144,7 +131,6 @@ class DHeap<A> {
     // check if `parent` and `child` respect the heap property;
     // implicitly sets the heap property and the key computation from elements;
     // also used to find the best child to swap with on a fixDown
-    dynamic
     function checkProperty(parent : A, child : A) : Bool {
         throw "Heap property undefined";
     }
@@ -152,7 +138,6 @@ class DHeap<A> {
     // position not necessary equal to index (only in this particular
     // implementation)
 
-    dynamic
     function getPosition(item : A) : Int {
         // defaults to a linear search
         var pos = 0;
@@ -164,19 +149,16 @@ class DHeap<A> {
         throw "Item not found";
     }
 
-    dynamic
     function savePosition(item : A, pos : Int) : Int {
         // defaults to noop
         return pos;
     }
 
-    dynamic
     function clearPosition(item : A) : Void {
         // defaults to saving -1
         savePosition(item, -1);
     }
 
-    dynamic
     function contains(item : A) : Bool {
         var pos = 0;
         while (pos < internal.length) {
@@ -264,13 +246,5 @@ class DHeap<A> {
         return pos;
     }
 
-}
-
-typedef DHeapConf<A> = {
-    checkProperty : A -> A -> Bool,
-    ?savePosition : A -> Int -> Int,
-    ?getPosition : A -> Int,
-    ?clearPosition : A -> Void,
-    ?contains : A -> Bool
 }
 
