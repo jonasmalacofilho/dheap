@@ -1,0 +1,7 @@
+# for completion, quick tests and systems without GNU make
+--interp
+-main DHeapTests
+-cp lib
+-cp tests
+-lib utest
+

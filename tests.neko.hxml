@@ -1,9 +1,0 @@
--neko out/dheap_tests.n
--main DHeapTests
-
--cp tests
--cp src
--lib utest
-
--D dump
-
