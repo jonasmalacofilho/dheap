@@ -3,62 +3,130 @@ package elebeta.ds;
 import elebeta.ds.DHeap;
 import utest.Assert;
 
-@:publicFields
-class TestDHeap {
+@:access(elebeta.ds.DHeap)
+@:forward
+private abstract DebugDHeap<A>(DHeap<A>) {
 
-    function new() {}
-
-    function minIntHeap(parent : Int, child : Int) {
-        return parent <= child;
+    public function new(conf)
+    {
+        this = new DHeap<A>(conf);
     }
 
-    function maxIntHeap(parent : Float, child : Float) {
-        return parent >= child;
+    public function dump()
+    {
+        return fullDump().slice(0, this.length);
     }
 
-    function testMinIntHeap() {
-        var heap = new DebugDHeap({checkProperty : minIntHeap});
-        heap.insert(3);
-        Assert.same([3], heap.dump());
-        heap.insert(2);
-        Assert.same([2, 3], heap.dump());
-        heap.insert(5);
-        Assert.same([2, 3, 5], heap.dump());
-        heap.insert(9);
-        Assert.same([2, 3, 5, 9], heap.dump());
-        heap.insert(1);
-        Assert.same([1, 2, 5, 9, 3], heap.dump());
-        heap.update(5, 4);
-        Assert.same([1, 2, 4, 9, 3], heap.dump());
-        heap.update(2, 10);
-        Assert.same([1, 3, 4, 9, 10], heap.dump());
-        Assert.equals(1, heap.peek());
-        Assert.equals(1, heap.extractRoot());
-        Assert.same([3, 9, 4, 10], heap.dump());
-        Assert.equals(3, heap.peek());
-        Assert.equals(3, heap.extractRoot());
-        Assert.same([4, 9, 10], heap.dump());
+    public function fullDump()
+    {
+        return this.internal.toArray();
     }
 
 }
 
-@:forward @:access(elebeta.ds.DHeap)
-abstract DebugDHeap<A>(DHeap<A>) {
+private typedef Element = {
+    key : Float,
+    ?pos : Int  // position on heap
+}
 
-    public
-    function new(conf) {
-        this = new DHeap<A>(conf);
+class TestDHeap {
+
+    // simple min int heap usage
+    public function test_01_MinSimpleHeap()
+    {
+        function prop(parent:Int, child:Int)
+            return parent <= child;
+
+        var heap = new DebugDHeap({ checkProperty : prop });
+        var x:Int;
+
+                                                Assert.equals(0, heap.length);
+        heap.insert(3);                         Assert.same([3], heap.dump());
+        heap.insert(2);                         Assert.same([2,3], heap.dump());
+        heap.insert(5);                         Assert.same([2,3,5], heap.dump());
+        heap.insert(9);                         Assert.same([2,3,5,9], heap.dump());
+        heap.insert(1);                         Assert.same([1,2,5,9,3], heap.dump());
+                                                Assert.equals(5, heap.length);
+        heap.update(5,4);                       Assert.same([1,2,4,9,3], heap.dump());
+        heap.update(2,10);                      Assert.same([1,3,4,9,10], heap.dump());
+                                                Assert.equals(5, heap.length);
+        x = heap.peek();                        Assert.equals(1, x);
+        x = heap.extractRoot();                 Assert.equals(1, x);
+                                                Assert.same([3,9,4,10], heap.dump());
+        x = heap.peek();                        Assert.equals(3, x);
+        x = heap.extractRoot();                 Assert.equals(3, x);
+                                                Assert.same([4,9,10], heap.dump());
+                                                Assert.equals(3, heap.length);
     }
 
-    public
-    function dump() {
-        return fullDump().slice(0, this.length);
+    // simple max int heap usage
+    public function test_02_MaxSimpleHeap()
+    {
+        function prop(parent:Int, child:Int)
+            return parent >= child;
+
+        var heap = new DebugDHeap({ checkProperty : prop });
+        var x:Int;
+
+                                                Assert.equals(0, heap.length);
+        heap.insert(3);                         Assert.same([3], heap.dump());
+        heap.insert(4);                         Assert.same([4,3], heap.dump());
+        heap.insert(1);                         Assert.same([4,3,1], heap.dump());
+        heap.insert(-3);                        Assert.same([4,3,1,-3], heap.dump());
+        heap.insert(5);                         Assert.same([5,4,1,-3,3], heap.dump());
+                                                Assert.equals(5, heap.length);
+        heap.update(1,2);                       Assert.same([5,4,2,-3,3], heap.dump());
+        heap.update(4,-4);                      Assert.same([5,3,2,-3,-4], heap.dump());
+                                                Assert.equals(5, heap.length);
+        x = heap.peek();                        Assert.equals(5, x);
+        x = heap.extractRoot();                 Assert.equals(5, x);
+                                                Assert.same([3,-3,2,-4], heap.dump());
+        x = heap.peek();                        Assert.equals(3, x);
+        x = heap.extractRoot();                 Assert.equals(3, x);
+                                                Assert.same([2,-3,-4], heap.dump());
+                                                Assert.equals(3, heap.length);
     }
 
-    public
-    function fullDump() {
-        return this.internal.toArray();
+    // efficient (non-linear) updates thanks to external position storage
+    // checks if getPosition and savePosition work as expected
+    // assumes testMinSimpleHeap will also be run
+    public function test_03_ComplexHeap()
+    {
+        var cfg = {
+            checkProperty:  function (parent:Element,child:Element) return parent.key <= child.key,
+            getPosition:    function (el:Element) return el.pos,
+            savePosition:   function (el:Element, pos:Int) return el.pos = pos
+         // clearPosition:  automatically computed from savePosition (pos == -1 => invalid)
+         // contains:       defaults to a linear search for equality (==)
+        };
+
+        function assertOk(exp:Array<Int>, rec:Array<Element>)
+        {
+            var exp = Lambda.array(Lambda.mapi(exp, function (i, x) return { key : x, pos : i }));
+            Assert.same(exp, rec);
+        }
+
+        var heap = new DebugDHeap(cfg);
+        var x:Element, xs:Array<Element>;
+
+        xs = [];
+        heap.insert(xs[3] = { key : 3 });       assertOk([3], heap.dump());
+        heap.insert(xs[2] = { key : 2 });       assertOk([2,3], heap.dump());
+        heap.insert(xs[5] = { key : 5 });       assertOk([2,3,5], heap.dump());
+        heap.insert(xs[9] = { key : 9 });       assertOk([2,3,5,9], heap.dump());
+        heap.insert(xs[1] = { key : 1 });       assertOk([1,2,5,9,3], heap.dump());
+        xs[5].key = 4; heap.update(xs[5]);      assertOk([1,2,4,9,3], heap.dump());
+        xs[2].key = 10; heap.update(xs[2]);     assertOk([1,3,4,9,10], heap.dump());
+        x = heap.peek();                        Assert.equals(xs[1], x);
+        x = heap.extractRoot();                 Assert.equals(xs[1], x);
+        x = heap.peek();                        Assert.equals(xs[3], x);
+        x = heap.extractRoot();                 Assert.equals(xs[3], x);
+                                                assertOk([4,9,10], heap.dump());
     }
+
+    // TODO test other arity != default
+
+    public function new() {}
 
 }
 
