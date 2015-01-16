@@ -248,20 +248,21 @@ class DHeap<A> {
     // return the final (possibly updated) position
     function fixDown(pos) {
         while (true) {
-            var change = pos;
-            var someChild = child(pos, 1), lastChild = child(pos, arity);
-            while (someChild <= lastChild && someChild < length ) {
-                // update when `someChild` is more parentish than `change`
-                if (checkProperty(get(someChild), get(change))) 
-                    change = someChild;
-                someChild++;
+            var best = pos;
+            var someChild = child(pos, 0);
+            var end = someChild + arity + 1;
+            if (end >= length)
+                end = length;
+            while (++someChild < end) {
+                // update when `someChild` is more parentish than `best`
+                if (checkProperty(get(someChild), get(best))) 
+                    best = someChild;
             }
-            if (change == pos)
+            if (best == pos)
                 return pos;  // done
-            swap(pos, change);
-            pos = change;
+            swap(pos, best);
+            pos = best;
         }
-        return pos;
     }
 
 }
