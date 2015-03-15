@@ -1,0 +1,13 @@
+{
+    "name"         :  "dheap",
+    "url"          :  "https://github.com/jonasmalacofilho/dheap",
+    "license"      :  "BSD",
+    "tags"         :  ["cross", "ds", "heap", "queue"],
+    "description"  :  "D-ary heaps for Haxe",
+    "version"      :  "0.1.0",
+    "classPath"    :  "lib",
+    "releasenote"  :  "Initial release",
+    "contributors" :  ["jonasmalacofilho", "elebeta"],
+    "dependencies" :  {}
+}
+
