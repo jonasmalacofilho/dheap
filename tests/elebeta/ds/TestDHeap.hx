@@ -103,10 +103,10 @@ class TestDHeap {
          // contains:       defaults to a linear search for equality (==)
         };
 
-        function assertOk(exp:Array<Int>, rec:Array<Element>)
+        function assertOk(exp:Array<Int>, rec:Array<Element>, ?pos:haxe.PosInfos)
         {
             var exp = Lambda.array(Lambda.mapi(exp, function (i, x) return { key : x, pos : i }));
-            Assert.same(exp, rec);
+            Assert.same(exp, rec, pos);
         }
 
         var heap = new DebugDHeap(cfg, 2);
