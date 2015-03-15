@@ -32,6 +32,8 @@ class DHeap<A> {
     public
     function new(conf : DHeapConf<A>, ?arity=2) {
         // maybe: move arity to @:genericBuild
+        if (arity < 1)
+            throw "Heap arity can't be equal to or less than zero";
         this.arity = arity;
         length = 0;
         if (conf.checkProperty == null)

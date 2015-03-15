@@ -7,9 +7,12 @@ import utest.Assert;
 @:forward
 private abstract DebugDHeap<A>(DHeap<A>) {
 
-    public function new(conf)
+    function get_arity() return this.arity;
+    public var arity(get, never):Int;
+
+    public function new(conf, arity:Null<Int>)
     {
-        this = new DHeap<A>(conf);
+        this = new DHeap<A>(conf, arity);
     }
 
     public function dump()
@@ -37,7 +40,7 @@ class TestDHeap {
         function prop(parent:Int, child:Int)
             return parent <= child;
 
-        var heap = new DebugDHeap({ checkProperty : prop });
+        var heap = new DebugDHeap({ checkProperty : prop }, 2);
         var x:Int;
 
                                                 Assert.equals(0, heap.length);
@@ -65,7 +68,7 @@ class TestDHeap {
         function prop(parent:Int, child:Int)
             return parent >= child;
 
-        var heap = new DebugDHeap({ checkProperty : prop });
+        var heap = new DebugDHeap({ checkProperty : prop }, 2);
         var x:Int;
 
                                                 Assert.equals(0, heap.length);
@@ -106,7 +109,7 @@ class TestDHeap {
             Assert.same(exp, rec);
         }
 
-        var heap = new DebugDHeap(cfg);
+        var heap = new DebugDHeap(cfg, 2);
         var x:Element, xs:Array<Element>;
 
         xs = [];
@@ -136,7 +139,7 @@ class TestDHeap {
         function test(cp:Int->Int->Bool)
         {
             var cfg = { checkProperty : cp };
-            var heap = new DebugDHeap(cfg);
+            var heap = new DebugDHeap(cfg, 2);
             var vals = [3,2,5,9,1];
             for (v in vals)
                 heap.insert(v);
@@ -151,9 +154,46 @@ class TestDHeap {
         Assert.isTrue(test(cp3));
     }
 
-    // TODO test other arity != default
+    public function test_05_Arity()
+    {
+        function prop(parent:Int, child:Int)
+            return parent <= child;
+
+        function test(arity)
+        {
+            var x:Int;
+            var heap = new DebugDHeap({ checkProperty : prop }, arity);
+                                                    Assert.equals(arity, heap.arity);
+                                                    Assert.equals(0, heap.length);
+            for (v in [3,2,5,9,1])
+                heap.insert(v);
+                                                    Assert.equals(5, heap.length);
+            heap.update(5,4);
+            heap.update(2,10);
+                                                    Assert.equals(5, heap.length);
+            x = heap.peek();                        Assert.equals(1, x);
+            x = heap.extractRoot();                 Assert.equals(1, x);
+            x = heap.peek();                        Assert.equals(3, x);
+            x = heap.extractRoot();                 Assert.equals(3, x);
+                                                    Assert.equals(3, heap.length);
+        }
+
+        test(1);
+        test(2);
+        test(3);
+        test(4);
+        test(16);
+
+        Assert.raises(test.bind(0));
+        Assert.raises(test.bind(-1));
+    }
+
+    public function test_06_DefaultArityValue()
+    {
+        var heap = new DebugDHeap({ checkProperty : function (a,b) return true }, null);
+        Assert.equals(2, heap.arity);
+    }
 
     public function new() {}
-
 }
 
