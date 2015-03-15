@@ -140,8 +140,10 @@ class TestDHeap {
             var vals = [3,2,5,9,1];
             for (v in vals)
                 heap.insert(v);
+            Assert.equals(vals.length, heap.length);
             for (v in vals)
                 heap.extractRoot();
+            Assert.equals(0, heap.length);
             return true;
         }
         Assert.isTrue(test(cp1));
