@@ -25,7 +25,7 @@ private abstract DebugDHeap<A>(DHeap<A>) {
 }
 
 private typedef Element = {
-    key : Float,
+    key : Int,
     ?pos : Int  // position on heap
 }
 
