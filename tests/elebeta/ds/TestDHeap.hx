@@ -124,6 +124,31 @@ class TestDHeap {
                                                 assertOk([4,9,10], heap.dump());
     }
 
+    // make sure it works with checkProperty functions that always
+    // return true or false (independently of its inputs) or that
+    // are not deterministic
+    public function test_04_UnusualProperties()
+    {
+        function cp1(parent:Int, child:Int) return true;
+        function cp2(parent:Int, child:Int) return false;
+        function cp3(parent:Int, child:Int) return Math.random() > .5;
+
+        function test(cp:Int->Int->Bool)
+        {
+            var cfg = { checkProperty : cp };
+            var heap = new DebugDHeap(cfg);
+            var vals = [3,2,5,9,1];
+            for (v in vals)
+                heap.insert(v);
+            for (v in vals)
+                heap.extractRoot();
+            return true;
+        }
+        Assert.isTrue(test(cp1));
+        Assert.isTrue(test(cp2));
+        Assert.isTrue(test(cp3));
+    }
+
     // TODO test other arity != default
 
     public function new() {}
